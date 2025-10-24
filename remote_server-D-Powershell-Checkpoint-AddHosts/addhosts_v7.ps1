@@ -15,7 +15,7 @@ param (
     [string]$RunMode,
 
     [Parameter(Mandatory=$false)]
-    [string]$ApiPassword
+    [pscredential]$ApiCredential
 )
 
 #region Setup Paths and Modules
@@ -283,7 +283,11 @@ function Sync-CheckpointObject {
     Set-IniValue -FilePath $global:iniFilePath -Section PATHS -Key csv_addhosts -Value $CsvPath
     Set-IniValue -FilePath $global:iniFilePath -Section REQUEST -Key mode -Value $RunMode
     
-    $sessionID = Get-SessionID -ApiPassword $ApiPassword
+    $apiPassword = $null
+    if ($null -ne $ApiCredential) {
+        $apiPassword = $ApiCredential.GetNetworkCredential().Password
+    }
+    $sessionID = Get-SessionID -ApiPassword $apiPassword -ApiPassword $ApiPassword
     Set-IniValue -FilePath $global:iniFilePath -Section USER -Key sessionid -Value $sessionID
  
     if (-not $sessionID) {

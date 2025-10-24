@@ -111,13 +111,12 @@ function Get-CPWhereUsed_v2 {
         [switch]$ReadOnly
     )
 
-    $apiPassword = $null
+    $apiCredential = $null
     if ($ReadOnly.IsPresent) {
         $credentialTarget = "fwmgr"
         Write-Host "Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
         $apiCredential = Get-StoredCredential -TargetName $credentialTarget
         if ($apiCredential) {
-            $apiPassword = $apiCredential.GetNetworkCredential().Password
             Write-Host "Local credential found. Proceeding with remote execution." -ForegroundColor Green
         } else {
             Write-Error "Read-only mode failed: Could not find local credential '$credentialTarget' in your Windows Credential Manager."
@@ -126,12 +125,12 @@ function Get-CPWhereUsed_v2 {
     }
 
     Invoke-Command -ComputerName $servername -Credential $cred -ScriptBlock {
-        param ($targetDirectory, $fwmgrName, $ipToQuery, $apiPassword)
+        param ([string]$targetDirectory, [string]$fwmgrName, [string]$ipToQuery, [pscredential]$apiCredential)
 
         Set-Location -Path $targetDirectory
-        # Call the remote script with named parameters, passing the password if it was retrieved
-        .\whereused_v2.ps1 -MgmtServer $fwmgrName -IpAddress $ipToQuery -ApiPassword $apiPassword
-    } -ArgumentList $targetDirectory, $fwmgrName, $ipToQuery, $apiPassword
+        # Call the remote script with named parameters, passing the credential object if it was retrieved
+        .\whereused_v2.ps1 -MgmtServer $fwmgrName -IpAddress $ipToQuery -ApiCredential $apiCredential
+    } -ArgumentList $targetDirectory, $fwmgrName, $ipToQuery, $apiCredential
 }
 
 function Add-CPHosts_v7 {
@@ -153,7 +152,7 @@ function Add-CPHosts_v7 {
         [string]$Mode
     )
     
-    $apiPassword = $null
+    $apiCredential = $null
     $credToUse = $Credential # Default to the provided admin credential
 
     if ($Mode -eq 'test') {
@@ -161,7 +160,6 @@ function Add-CPHosts_v7 {
         Write-Host "Test mode detected. Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
         $apiCredential = Get-StoredCredential -TargetName $credentialTarget
         if ($apiCredential) {
-            $apiPassword = $apiCredential.GetNetworkCredential().Password
             Write-Host "Local credential found. Proceeding with remote execution using read-only account." -ForegroundColor Green
         } else {
             Write-Error "Test mode failed: Could not find local credential '$credentialTarget' in your Windows Credential Manager."
@@ -172,13 +170,13 @@ function Add-CPHosts_v7 {
     # command call on the remote server
     Invoke-Command -ComputerName $servername -Credential $credToUse -ScriptBlock {
         # Parameters passed to the script block
-        param ($targetDirectory, $changeRequest, $fwmgrName, $mode, $apiPassword)
+        param ([string]$targetDirectory, [string]$changeRequest, [string]$fwmgrName, [string]$mode, [pscredential]$apiCredential)
         
         # Location setting, as before
         Set-Location -Path $targetDirectory
         
         # We call the new script with named parameters
-        .\addhosts_v7.ps1 -MgmtServer $fwmgrName -CsvPath ".\csv\$($ChangeRequest).csv" -RunMode $mode -ApiPassword $apiPassword
+        .\addhosts_v7.ps1 -MgmtServer $fwmgrName -CsvPath ".\csv\$($ChangeRequest).csv" -RunMode $mode -ApiCredential $apiCredential
 
-    } -ArgumentList $targetDirectory, $ChangeRequest, $FwmgrName, $Mode, $apiPassword
+    } -ArgumentList $targetDirectory, $ChangeRequest, $FwmgrName, $Mode, $apiCredential
 }

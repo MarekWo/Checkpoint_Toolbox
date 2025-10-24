@@ -7,7 +7,7 @@ param (
     [string]$IpAddress,
 
     [Parameter(Mandatory=$false)]
-    [string]$ApiPassword
+    [pscredential]$ApiCredential
 )
 
 # Global variables
@@ -119,7 +119,11 @@ try {
     $WhereusedArray = @()
 
     Set-IniValue -FilePath "$env:USERPROFILE\cp_tools.ini" -Section CHECKPOINT -Key fwmgr -Value $MgmtServer # set the FW server name
-    $sessionID = Get-SessionID -ApiPassword $ApiPassword
+    $apiPassword = $null
+    if ($null -ne $ApiCredential) {
+        $apiPassword = $ApiCredential.GetNetworkCredential().Password
+    }
+    $sessionID = Get-SessionID -ApiPassword $apiPassword
 
     if (-not $sessionID) {
         Write-Error "Failed to get a session ID. Halting script."
