@@ -29,13 +29,13 @@ break # To prevent from inadvertently running all lines of the script at once.
 # Run each command by selecting a block of code and hitting F8 key
 
 # create host objects and add them to a group. Make sure a csv file with all necessary data is created. See the comment about $ChangeRequest variable
-Add-CPHosts @fwmgr -ch $changeRequest -m test
-Add-CPHosts @fwmgr -ch $changeRequest -m full
+# Add-CPHosts @fwmgr -ch $changeRequest -m test
+# Add-CPHosts @fwmgr -ch $changeRequest -m full
 
-# --- NEW v6 SCRIPT INVOCATION ---
+# --- NEW v7 SCRIPT INVOCATION ---
 # Note: The new function requires explicit, named parameters instead of splatting
-# Add-CPHosts_v6 -FwmgrName $fwmgr.fwmgrName -Credential $fwmgr.cred -ChangeRequest $ChangeRequest -Mode 'test'
-# Add-CPHosts_v6 -FwmgrName $fwmgr.fwmgrName -Credential $fwmgr.cred -ChangeRequest $ChangeRequest -Mode 'full'
+Add-CPHosts_v7 -FwmgrName $fwmgr.fwmgrName -Credential $fwmgr.cred -ChangeRequest $ChangeRequest -Mode 'test'
+Add-CPHosts_v7 -FwmgrName $fwmgr.fwmgrName -Credential $fwmgr.cred -ChangeRequest $ChangeRequest -Mode 'full'
 
 # Install selected policy
 Push-CPPolicy @fwmgr -p "CSTEST-Policy"

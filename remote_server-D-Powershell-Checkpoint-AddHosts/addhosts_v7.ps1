@@ -153,7 +153,6 @@ function Test-CheckpointApiResult {
     return $true
 }
 
-
 # Function to process a generic Checkpoint object (host, network, or range)
 function Sync-CheckpointObject {
     param (
