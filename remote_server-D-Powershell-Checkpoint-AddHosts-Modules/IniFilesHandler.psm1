@@ -87,40 +87,42 @@ function Get-IniValue {
         [Parameter(Mandatory=$true)]
         [string]$Section,
         [Parameter(Mandatory=$true)]
-        [string]$Key
+        [string]$Key,
+        [Parameter(Mandatory=$false)]
+        [string]$DefaultValue
     )
  
     # Check if the file exists
     if (-not (Test-Path $FilePath)) {
-        Write-Verbose "File not found: $FilePath. Returning empty string."
-        return ""
+        Write-Verbose "File not found: $FilePath. Returning default value."
+        return $DefaultValue
     }
  
     # Read the content of the file
     $content = Get-Content $FilePath -ErrorAction SilentlyContinue
  
     if ($null -eq $content) {
-        Write-Verbose "File is empty: $FilePath. Returning empty string."
-        return ""
+        Write-Verbose "File is empty: $FilePath. Returning default value."
+        return $DefaultValue
     }
  
     # Find the section
     $sectionStart = $content | Select-String -Pattern "^\[$Section\]$" | Select-Object -First 1 -ExpandProperty LineNumber
     if (-not $sectionStart) {
-        Write-Verbose "Section [$Section] not found in $FilePath. Returning empty string."
-        return ""
+        Write-Verbose "Section [$Section] not found in $FilePath. Returning default value."
+        return $DefaultValue
     }
  
     # Search for the key in the section
     for ($i = $sectionStart; $i -lt $content.Count; $i++) {
-        if ($content[$i] -match "^\[") {
+        if ($content[$i] -match "^\[" -and $i -ne ($sectionStart - 1)) {
             break
         }
         if ($content[$i] -match "^$Key\s*=\s*(.*)$") {
-            return $matches[1]
+            return $matches[1].Trim()
         }
     }
  
-    Write-Verbose "Key '$Key' not found in section [$Section] of $FilePath. Returning empty string."
-    return ""
+    Write-Verbose "Key '$Key' not found in section [$Section] of $FilePath. Returning default value."
+    return $DefaultValue
 }

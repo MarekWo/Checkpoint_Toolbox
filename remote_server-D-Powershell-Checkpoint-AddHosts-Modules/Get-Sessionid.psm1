@@ -19,7 +19,7 @@ function Get-SessionID {
             }
 
             $fwmgr = Get-IniValue -FilePath "$env:USERPROFILE\cp_tools.ini" -Section CHECKPOINT -Key fwmgr
-            $domain = Get-IniValue -FilePath "$env:USERPROFILE\cp_tools.ini" -Section CHECKPOINT -Key domain -Default "example.com"
+            $domain = Get-IniValue -FilePath "$env:USERPROFILE\cp_tools.ini" -Section CHECKPOINT -Key domain -DefaultValue "example.com"
             $mgmtServer = "https://$($fwmgr).$($domain)"
 
             $response = Invoke-RestMethod -Uri "$mgmtServer/web_api/login" -Method Post -ContentType "application/json" -Body (@{ user = $apiUser; password = $ApiPassword } | ConvertTo-Json)
