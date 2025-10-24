@@ -47,16 +47,9 @@ Push-CPPolicy @fwmgr -p "CSTSTCHOKE-Policy"
 
 # check where IP is used. It can be used either directly in a rule/group, or indirectly (via a group)
 # ipToQuery can be a single IP, IP list separated with commas, a text file with a .txt extension
-Get-CPWhereUsed @fwmgr -ip 3.211.82.34 # object not found
-Get-CPWhereUsed @fwmgr -ip 172.30.2.40 # object not used
-Get-CPWhereUsed @fwmgr -ip 172.30.5.40 # object found and used
-Get-CPWhereUsed @fwmgr -ip 4.152.42.14, 4.152.42.32
-Get-CPWhereUsed @fwmgr -ip 20.58.59.172
-Get-CPWhereUsed @fwmgr -ip test\iplist.txt # path relative to the script's root
-Get-CPWhereUsed @fwmgr -ip 12.47.208.42, 207.17.46.42, 199.99.10.212, 207.17.44.212, 172.190.219.59, 203.66.10.154, 61.219.1.154, 211.72.107.26, 203.74.20.154
+Get-CPWhereUsed_v2 @fwmgr -ip 3.211.82.34 -ReadOnly # object not found
 
-
-Get-CPWhereUsed @fwmgr -ip test\to_cleanup.txt
+Get-CPWhereUsed_v2 @fwmgr -ip test\to_cleanup.txt
 
 # unmap the Y drive
 Get-PSDrive -Name "Y" | Remove-PSDrive 

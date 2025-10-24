@@ -11,7 +11,7 @@ param (
 )
 
 # Global variables
-Import-Module -Name 'D:\Powershell\Checkpoint\AddHosts\Modules\Get-Sessionid.ps1'
+Import-Module -Name 'D:\Powershell\Checkpoint\AddHosts\Modules\Get-Sessionid.psm1'
 
 # Main script
 function Get-CheckpointIPInfo {

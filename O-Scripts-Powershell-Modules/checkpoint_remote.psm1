@@ -103,7 +103,7 @@ function Push-CPPolicy {
     } -ArgumentList $targetDirectory, $fwmgrName, $policyName
 }
 
-function Get-CPWhereUsed {
+function Get-CPWhereUsed_v2 {
     param (
         [string]$fwmgrName,
         [string]$ipToQuery,
@@ -113,7 +113,7 @@ function Get-CPWhereUsed {
 
     $apiPassword = $null
     if ($ReadOnly.IsPresent) {
-        $credentialTarget = "LegacyGeneric:target=fwmgr"
+        $credentialTarget = "fwmgr"
         Write-Host "Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
         $apiCredential = Get-StoredCredential -TargetName $credentialTarget
         if ($apiCredential) {
@@ -130,7 +130,7 @@ function Get-CPWhereUsed {
 
         Set-Location -Path $targetDirectory
         # Call the remote script with named parameters, passing the password if it was retrieved
-        .\whereused.ps1 -MgmtServer $fwmgrName -IpAddress $ipToQuery -ApiPassword $apiPassword
+        .\whereused_v2.ps1 -MgmtServer $fwmgrName -IpAddress $ipToQuery -ApiPassword $apiPassword
     } -ArgumentList $targetDirectory, $fwmgrName, $ipToQuery, $apiPassword
 }
 
