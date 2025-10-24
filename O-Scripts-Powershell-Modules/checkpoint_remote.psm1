@@ -107,21 +107,17 @@ function Get-CPWhereUsed_v2 {
     param (
         [string]$fwmgrName,
         [string]$ipToQuery,
-        [pscredential]$cred,
-        [switch]$ReadOnly
+        [pscredential]$cred
     )
 
-    $apiCredential = $null
-    if ($ReadOnly.IsPresent) {
-        $credentialTarget = "fwmgr"
-        Write-Host "Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
-        $apiCredential = Get-StoredCredential -TargetName $credentialTarget
-        if ($apiCredential) {
-            Write-Host "Local credential found. Proceeding with remote execution." -ForegroundColor Green
-        } else {
-            Write-Error "Read-only mode failed: Could not find local credential '$credentialTarget' in your Windows Credential Manager."
-            return
-        }
+    $credentialTarget = "fwmgr"
+    Write-Host "Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
+    $apiCredential = Get-StoredCredential -TargetName $credentialTarget
+    if ($apiCredential) {
+        Write-Host "Local credential found. Proceeding with remote execution." -ForegroundColor Green
+    } else {
+        Write-Error "Failed to execute: Could not find local credential '$credentialTarget' in your Windows Credential Manager."
+        return
     }
 
     Invoke-Command -ComputerName $servername -Credential $cred -ScriptBlock {
