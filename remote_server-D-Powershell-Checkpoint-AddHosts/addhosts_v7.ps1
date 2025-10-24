@@ -12,7 +12,10 @@ param (
 
     [Parameter(Mandatory = $true, HelpMessage = "Run mode: 'test' for simulation, 'full' for execution.")]
     [ValidateSet('test', 'full')]
-    [string]$RunMode
+    [string]$RunMode,
+
+    [Parameter(Mandatory=$false)]
+    [string]$ApiPassword
 )
 
 #region Setup Paths and Modules
@@ -280,7 +283,7 @@ function Sync-CheckpointObject {
     Set-IniValue -FilePath $global:iniFilePath -Section PATHS -Key csv_addhosts -Value $CsvPath
     Set-IniValue -FilePath $global:iniFilePath -Section REQUEST -Key mode -Value $RunMode
     
-    $sessionID = Get-SessionID
+    $sessionID = Get-SessionID -ApiPassword $ApiPassword
     Set-IniValue -FilePath $global:iniFilePath -Section USER -Key sessionid -Value $sessionID
  
     if (-not $sessionID) {

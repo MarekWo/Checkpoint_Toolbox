@@ -47,7 +47,7 @@ Push-CPPolicy @fwmgr -p "CSTSTCHOKE-Policy"
 
 # check where IP is used. It can be used either directly in a rule/group, or indirectly (via a group)
 # ipToQuery can be a single IP, IP list separated with commas, a text file with a .txt extension
-Get-CPWhereUsed_v2 @fwmgr -ip 3.211.82.34 -ReadOnly # object not found
+Get-CPWhereUsed_v2 @fwmgr -ip 3.211.82.34 -ReadOnly 
 
 Get-CPWhereUsed_v2 @fwmgr -ip test\to_cleanup.txt
 

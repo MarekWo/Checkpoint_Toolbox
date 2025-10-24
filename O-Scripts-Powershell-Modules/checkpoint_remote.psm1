@@ -134,7 +134,7 @@ function Get-CPWhereUsed_v2 {
     } -ArgumentList $targetDirectory, $fwmgrName, $ipToQuery, $apiPassword
 }
 
-function Add-CPHosts_v6 {
+function Add-CPHosts_v7 {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory=$true)]
@@ -153,16 +153,32 @@ function Add-CPHosts_v6 {
         [string]$Mode
     )
     
+    $apiPassword = $null
+    $credToUse = $Credential # Default to the provided admin credential
+
+    if ($Mode -eq 'test') {
+        $credentialTarget = "fwmgr"
+        Write-Host "Test mode detected. Attempting to read local credential for '$credentialTarget'..." -ForegroundColor Gray
+        $apiCredential = Get-StoredCredential -TargetName $credentialTarget
+        if ($apiCredential) {
+            $apiPassword = $apiCredential.GetNetworkCredential().Password
+            Write-Host "Local credential found. Proceeding with remote execution using read-only account." -ForegroundColor Green
+        } else {
+            Write-Error "Test mode failed: Could not find local credential '$credentialTarget' in your Windows Credential Manager."
+            return
+        }
+    }
+
     # command call on the remote server
-    Invoke-Command -ComputerName $servername -Credential $Credential -ScriptBlock {
+    Invoke-Command -ComputerName $servername -Credential $credToUse -ScriptBlock {
         # Parameters passed to the script block
-        param ($targetDirectory, $changeRequest, $fwmgrName, $mode)
+        param ($targetDirectory, $changeRequest, $fwmgrName, $mode, $apiPassword)
         
         # Location setting, as before
         Set-Location -Path $targetDirectory
         
         # We call the new script with named parameters
-        .\addhosts_v6.ps1 -MgmtServer $fwmgrName -CsvPath ".\csv\$($ChangeRequest).csv" -RunMode $mode
+        .\addhosts_v7.ps1 -MgmtServer $fwmgrName -CsvPath ".\csv\$($ChangeRequest).csv" -RunMode $mode -ApiPassword $apiPassword
 
-    } -ArgumentList $targetDirectory, $ChangeRequest, $FwmgrName, $Mode
+    } -ArgumentList $targetDirectory, $ChangeRequest, $FwmgrName, $Mode, $apiPassword
 }
