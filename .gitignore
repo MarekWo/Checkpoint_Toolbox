@@ -1,0 +1,2 @@
+# Ignore sensitive configuration files
+**/cp_tools.ini

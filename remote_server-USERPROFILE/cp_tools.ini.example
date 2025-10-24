@@ -1,0 +1,19 @@
+[PATHS]
+csv_addhosts=.\csv\CHG0123456.csv
+export=D:\Powershell\Checkpoint\AddHosts\export
+log_addhosts=D:\Powershell\Checkpoint\AddHosts\log\addhosts.log
+root_folder=D:\Powershell\Checkpoint\AddHosts
+
+[USER]
+; Session IDs are typically retrieved and stored automatically by the scripts.
+sessionid_fwmgr=
+sessionid=
+sessionid_sgar80fwmgr=
+username=your_username
+
+[CHECKPOINT]
+fwmgr=fwmgr
+domain=example.com ; Replace with your company's domain
+
+[REQUEST]
+mode=test
