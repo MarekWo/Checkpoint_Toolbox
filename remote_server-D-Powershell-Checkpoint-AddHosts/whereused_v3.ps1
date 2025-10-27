@@ -87,7 +87,25 @@ function Get-CheckpointObjectInfo {
     $natAddress = $null
 
     # Determine object type and find it
-    if (Test-IsValidIPAddress -ip $Query) {
+    if (Test-IsValidCIDR -cidr $Query) {
+        $objectType = "network"
+        $response = Invoke-CheckpointApi -endpoint "show-networks" -body @{filter = $Query} -sessionID $sessionID
+        if ($response.objects) {
+            $foundObject = $response.objects | Select-Object -First 1
+        }
+    }
+    elseif (Test-IsValidIPRange -range $Query) {
+        $objectType = "range"
+        $ips = $Query -split '-'
+        $ipFirst = $ips[0]
+        $ipLast = $ips[1]
+        $allRanges = Invoke-CheckpointApi -endpoint "show-address-ranges" -body @{"details-level" = "full"} -sessionID $sessionID
+        if ($allRanges.objects) {
+            $foundObject = $allRanges.objects | Where-Object { $_."ipv4-address-first" -eq $ipFirst -and $_."ipv4-address-last" -eq $ipLast } | Select-Object -First 1
+        }
+    }
+    elseif (Test-IsValidIPAddress -ip $Query) {
+        # First, assume it's a host and try to find an exact match
         $objectType = "host"
         $matchingHostObjects = Invoke-CheckpointApi -endpoint "show-hosts" -body @{filter = $Query} -sessionID $sessionID
         if ($matchingHostObjects.objects -and $matchingHostObjects.objects.Count -gt 0) {
@@ -99,23 +117,15 @@ function Get-CheckpointObjectInfo {
                 }
             }
         }
-    }
-    elseif (Test-IsValidCIDR -cidr $Query) {
-        $objectType = "network"
-        $networkInfo = ConvertFrom-CIDR -IPAddress $Query
-        $response = Invoke-CheckpointApi -endpoint "show-networks" -body @{filter = $networkInfo.NetworkID} -sessionID $sessionID
-        if ($response.objects) {
-            $foundObject = $response.objects | Where-Object { $_.subnet -eq $networkInfo.NetworkID -and $_.'subnet-mask' -eq $networkInfo.SubnetMask } | Select-Object -First 1
-        }
-    }
-    elseif (Test-IsValidIPRange -range $Query) {
-        $objectType = "range"
-        $ips = $Query -split '-'
-        $ipFirst = $ips[0]
-        $ipLast = $ips[1]
-        $allRanges = Invoke-CheckpointApi -endpoint "show-address-ranges" -body @{"details-level" = "full"} -sessionID $sessionID
-        if ($allRanges.objects) {
-            $foundObject = $allRanges.objects | Where-Object { $_."ipv4-address-first" -eq $ipFirst -and $_."ipv4-address-last" -eq $ipLast } | Select-Object -First 1
+
+        # If no exact host match was found, it might be a network object identified by its network address
+        if (-not $foundObject) {
+            $objectType = "network"
+            $response = Invoke-CheckpointApi -endpoint "show-networks" -body @{filter = $Query} -sessionID $sessionID
+            if ($response.objects) {
+                # The filter might return multiple networks (e.g., containing networks). Find the one where the subnet address is exactly our query.
+                $foundObject = $response.objects | Where-Object { $_.subnet -eq $Query } | Select-Object -First 1
+            }
         }
     }
 
