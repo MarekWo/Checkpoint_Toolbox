@@ -287,7 +287,7 @@ function Sync-CheckpointObject {
     if ($null -ne $ApiCredential) {
         $apiPassword = $ApiCredential.GetNetworkCredential().Password
     }
-    $sessionID = Get-SessionID -ApiPassword $apiPassword -ApiPassword $ApiPassword
+    $sessionID = Get-SessionID -ApiPassword $apiPassword
     Set-IniValue -FilePath $global:iniFilePath -Section USER -Key sessionid -Value $sessionID
  
     if (-not $sessionID) {
